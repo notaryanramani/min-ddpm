@@ -2,9 +2,10 @@ import torch
 import torch.nn as nn
 import torch.nn.functional as F
 from .attention import SelfAttention
+from typing import Union
 
 class Convs(nn.Module):
-    def __init__(self, in_channels, out_channels):
+    def __init__(self, in_channels:int, out_channels:int) -> None:
         super().__init__()
         self.net = nn.Sequential(
             nn.GroupNorm(1, in_channels),
@@ -14,13 +15,13 @@ class Convs(nn.Module):
             nn.Conv2d(out_channels, out_channels, kernel_size=3, padding=1),
         )
 
-    def forward(self, x):
+    def forward(self, x:torch.Tensor) -> torch.Tensor:
         out = F.gelu(self.net(x))
         return out
     
 
 class DownConv(nn.Module):
-    def __init__(self, in_channels, out_channels, n_embd = 256):
+    def __init__(self, in_channels:int, out_channels:int, n_embd:int=256) -> None:
         super().__init__()
         self.net = nn.Sequential(
             nn.MaxPool2d(2),
@@ -34,7 +35,7 @@ class DownConv(nn.Module):
             nn.SiLU()
         )
     
-    def forward(self, x, t):
+    def forward(self, x:torch.Tensor, t:torch.Tensor) -> torch.Tensor:
         x = self.net(x)
         t = self.time_net(t)[:, :, None, None]
         out = x + t
@@ -42,7 +43,7 @@ class DownConv(nn.Module):
     
 
 class UpConv(nn.Module):
-    def __init__(self, in_channels, out_channels, n_embd=256):
+    def __init__(self, in_channels:int, out_channels:int, n_embd:int=256) -> None:
         super().__init__()
         self.upsample = nn.Upsample(scale_factor=2, mode='bilinear', align_corners=True)
         self.net = nn.Sequential(
@@ -56,7 +57,7 @@ class UpConv(nn.Module):
             nn.SiLU()
         )
 
-    def forward(self, x, t, residual):
+    def forward(self, x:torch.Tensor, t:torch.Tensor, residual:torch.Tensor) -> torch.Tensor:
         x = self.upsample(x)
         x = torch.cat([x, residual], dim = 1)
         x = self.net(x)
@@ -66,7 +67,9 @@ class UpConv(nn.Module):
 
 
 class UNet(nn.Module):
-    def __init__(self, c_in=3, c_out=3, layers=3, n_labels=10, channels = 64, n_heads=4, n_embd=256, time_steps=1000):
+    def __init__(self, c_in:int=3, c_out:int=3, layers:int=3, n_labels:int=10, 
+                 channels:int=64, n_heads:int=4, n_embd:int=256, time_steps:int=1000) -> None:
+        
         super().__init__()
         self.layers = 3
         outs = [i for i in range(1, layers)] + [layers-1]
@@ -103,7 +106,7 @@ class UNet(nn.Module):
         self.out_conv = nn.Conv2d(channels, c_out, kernel_size=1)
     
 
-    def forward(self, x, t, y=None):
+    def forward(self, x:torch.Tensor, t:torch.Tensor, y:Union[torch.Tensor, None]=None) -> torch.Tensor:
         t = self.time_encoding(t)
         if y is not None:
             y = self.label_encoding(y) 

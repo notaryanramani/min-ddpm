@@ -55,7 +55,7 @@ class DiffusionModel:
     def save(self, PATH:str) -> None:
         torch.save(self.m.state_dict(), PATH)
 
-    def sample(self, n:int, labels:Union[List[int]], cfg_scale:int = 7.5, img_size=64):
+    def sample(self, n:int, labels:Union[List[int]], cfg_scale:Union[int, float] = 7.5, img_size=64) -> torch.Tensor:
         self.m.eval()
         with torch.no_grad():
             x = torch.randn((n, 3, img_size, img_size)).to(self.device)
