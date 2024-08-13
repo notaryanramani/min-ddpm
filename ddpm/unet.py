@@ -116,7 +116,7 @@ class UNet(nn.Module):
         for i, (net, att) in enumerate(zip(self.down_convs, self.down_attentions)):
             x = net(x, t)
             x = att(x)
-            if i != self.layers - 1: # ignore last down conv for concat
+            if i != self.layers - 1: # ignore last down conv for append
                 x_skips.append(x)
 
         x = self.bottleneck(x)

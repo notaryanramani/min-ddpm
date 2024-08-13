@@ -1,16 +1,14 @@
-import torch
-from ddpm.unet import UNet
 from ddpm import DiffusionModel
 
-device = 'cuda' if torch.cuda.is_available() else 'cpu'
-print(f'running on {device}')
+PATH = 'cifar10-64/train'
 
-unet = UNet()
-unet.to(device)
+ddpm = DiffusionModel()
+ddpm.train(data_path=PATH)
 
-# Random Forward pass
-x = torch.randn(32, 3, 32, 32).to(device)
-t = torch.randint(0, 1000, (32,)).to(device)
+# To save a trained model
+# ddpm.save('PATH_TO_DIRECTORY') 
 
-with torch.no_grad():
-    unet(x, t)
+# To load a pretrained model
+# ddpm.from_pretrained(state_dict)
+# ddpm.train(data_path='PATH_T0_DIRECTORY')
+# NOTE: try to keep a very low learning rate while fine-tuning

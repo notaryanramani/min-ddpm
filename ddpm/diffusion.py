@@ -9,9 +9,11 @@ from typing import List, Union
 
 
 class DiffusionModel:
-    def __init__(self, scheduler=None) -> None:
-        self.scheduler = scheduler if scheduler else Scheduler()
-        self.m = UNet()
+    def __init__(self, scheduler:Union[Scheduler, None]=None, layers:int=3, n_labels:int=10, 
+                 channels:int=64, n_heads:int=4, n_embd:int=256, time_steps:int=1000) -> None:
+
+        self.scheduler = scheduler if scheduler else Scheduler(noise_steps=time_steps)
+        self.m = UNet(layers=layers, n_labels=n_labels, channels=channels, n_heads=n_heads, n_embd=n_embd, time_steps=time_steps)
         self.device = 'cuda' if torch.cuda.is_available() else 'cpu'
 
     def train(self, 
@@ -19,10 +21,12 @@ class DiffusionModel:
               epochs:int=200, 
               lr:float= 3e-4, 
               batch_size:int=32, 
+              eta_min = 3e-6,
+              warmup_epcohs = 50, # try to keep this 25% of epochs
               return_unet_model=False) -> Union[UNet, None]:
         dataloader = get_data(data_path, batch_size)
         opt = AdamW(self.m.parameters(), lr=lr)
-        opt_sch = CustomCosineAnnealingLR(opt, epochs, eta_min=3e-6, warmup_epochs=int(epochs * 0.25))
+        opt_sch = CustomCosineAnnealingLR(opt, epochs, eta_min=eta_min, warmup_epochs=warmup_epcohs)
         mse = nn.MSELoss()
 
         for epoch in range(epochs):
