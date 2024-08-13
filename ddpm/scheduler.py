@@ -1,13 +1,15 @@
 import torch
 
 
-device = "cuda" if torch.cuda.is_available() else 'cpu'
 
 class Scheduler:
     def __init__(self, 
                  noise_steps:int = 1000,
                  beta_start:float = 1e-4,
                  beta_end:float = 0.02) -> None:
+        device = "cuda" if torch.cuda.is_available() else 'cpu'
+        self.noise_steps = noise_steps
+
         self.beta_start = beta_start
         self.beta_end = beta_end
 
@@ -21,8 +23,6 @@ class Scheduler:
         epsilon = torch.rand_like(x)
         x = ah_sqrt * x + ah_om_sqrt * epsilon
         return x, epsilon
-
-    def sample(self, model, n, labels):
-        pass
-        
-        # TODO after developing UNet - model
+    
+    def sample_timesteps(self, n:int) -> torch.Tensor:
+        return torch.randint(1, self.noise_steps, (n,))

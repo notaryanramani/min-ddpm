@@ -4,7 +4,7 @@ import torch.nn.functional as F
 
 
 class SelfAttention(nn.Module):
-    def __init__(self, channels, heads, dropout = 0.2):
+    def __init__(self, channels:int, heads:int, dropout = 0.2) -> None:
         super().__init__()
         self.ln = nn.LayerNorm(channels)
         self.mha = nn.MultiheadAttention(channels, heads, dropout=dropout, batch_first=True)
@@ -15,10 +15,9 @@ class SelfAttention(nn.Module):
             nn.Linear(channels * 4, channels)
         )
 
-    def forward(self, x):
+    def forward(self, x:torch.Tensor) -> torch.Tensor:
         B, C, H, W = x.shape
         x = x.view(B, C, H*W).transpose(1, 2)
-
         x_ln = self.ln(x)
         att, _ = self.mha(x_ln, x_ln, x_ln)
         x = x + att
