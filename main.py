@@ -1,9 +1,11 @@
 from ddpm import DiffusionModel
 
-PATH = 'cifar10-64/train'
 
 ddpm = DiffusionModel()
-ddpm.train(data_path=PATH)
+ddpm.train()
+
+# for ampere archiecture
+# ddpm.train(useAutocast=True)
 
 # To save a trained model
 # ddpm.save('PATH_TO_DIRECTORY') 
