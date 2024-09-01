@@ -153,8 +153,8 @@ class DiffusionModel:
                 t = (torch.ones(n) * i).int().to(self.device)
                 predicted_noise = m(x, t, labels)
                 if cfg_scale > 0:
-                    uncond_predicted_nosie = m(x, t, labels)
-                    predicted_noise = cfg_scale * (predicted_noise - uncond_predicted_nosie) + uncond_predicted_nosie
+                    uncond_predicted_noise = m(x, t, None)
+                    predicted_noise = cfg_scale * (predicted_noise - uncond_predicted_noise) + uncond_predicted_noise
                 alpha = self.scheduler.alpha[t][:, None, None, None]
                 alpha_hat = self.scheduler.alpha_hat[t][:, None, None, None]
                 beta = self.scheduler.beta[t][:, None, None, None]
