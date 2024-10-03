@@ -4,7 +4,7 @@ from ddpm import DiffusionModel
 ddpm = DiffusionModel()
 ddpm.train()
 
-# for ampere archiecture
+# for faster training with bfloat16 compatibility
 # ddpm.train(useAutocast=True)
 
 # To save a trained model

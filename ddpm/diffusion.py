@@ -39,6 +39,7 @@ class DiffusionModel:
               useAutocast = False,
               useEMA = False, 
               generateSamples=True) -> Union[UNet, None]:
+        
         if useAutocast:
             torch.set_float32_matmul_precision('high')
         if useEMA:
@@ -48,7 +49,6 @@ class DiffusionModel:
         trainFolder = baseFolder+'train'
         valFolder = baseFolder+'test'
         train_dataloader = get_dataloader(trainFolder, batch_size)
-        val_dataloader = get_dataloader(valFolder, batch_size)
         opt = AdamW(self.m.parameters(), lr=lr)
         opt_sch = CustomCosineAnnealingLR(opt, epochs, eta_min=eta_min, warmup_epochs=warmup_epcohs)
         mse = nn.MSELoss()
@@ -136,6 +136,7 @@ class DiffusionModel:
                img_size=32,
                permute=True, 
                useEMA = False) -> torch.Tensor:
+        
         if useEMA is True:
             if self.ema_model is None:
                 raise NotImplementedError('EMA was not used during training')
@@ -149,12 +150,14 @@ class DiffusionModel:
             x = torch.randn((n, 3, img_size, img_size)).to(self.device)
             labels = torch.tensor(labels).to(dtype=torch.int, device=self.device)
             pb = tqdm(reversed(range(1, self.scheduler.noise_steps)), position=0, total=self.scheduler.noise_steps, initial=1)
+            
             for i in pb:
                 t = (torch.ones(n) * i).int().to(self.device)
                 predicted_noise = m(x, t, labels)
                 if cfg_scale > 0:
                     uncond_predicted_noise = m(x, t, None)
                     predicted_noise = cfg_scale * (predicted_noise - uncond_predicted_noise) + uncond_predicted_noise
+                
                 alpha = self.scheduler.alpha[t][:, None, None, None]
                 alpha_hat = self.scheduler.alpha_hat[t][:, None, None, None]
                 beta = self.scheduler.beta[t][:, None, None, None]
