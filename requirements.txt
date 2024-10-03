@@ -1,6 +1,5 @@
 numpy
 tqdm
 matplotlib
---extra-index-url https://download.pytorch.org/whl/nightly/cu121
 torch
 torchvision
